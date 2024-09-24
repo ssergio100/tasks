@@ -15,8 +15,13 @@
                 <span :style="{ color: task.color }"  @click="copyText(task.number)" >{{ task.number }}</span>
                 <span style="font-size: 10px;"class="text-truncate"  @click="copyText(task.summary)"> - {{ truncate(task.summary, colNum === 6 ? 60 : 200) }}</span>
               </v-card-title>
+
               <v-card-subtitle style="padding-bottom: 7px;opacity: 1;" >
-				        <span @click="clearTimeTask(task)" style="opacity: 0.5;padding-right: 10px;">{{ task.status_id === 2 ? formattedTime : formatTime(task.time) }}</span>
+				        <span 
+                  @click="clearTimeTask(task)" 
+                  style="opacity: 0.5;padding-right: 10px;">
+                  {{ task.status_id === 2 ? formattedTime : formatTime(task.time) }}
+                </span>
                 <v-tooltip :text=task.comments>
                   <template v-slot:activator="{ props }">
                     <v-icon v-bind="props" @click="copyText(task.comments)"
@@ -30,11 +35,13 @@
                 </v-tooltip>
            
                 <v-icon v-if="task.link !== null " color="blue-grey-lighten-3" size="16" @click="openLink(task.link)">{{ 'mdi-link' }}</v-icon>
+                
                 <span style="padding-left: 5px;">  
-                  <v-icon v-if="task.dev !== null " color="lime" size="16"  @click="openLink(task.dev)">{{ 'mdi-server-minus' }}</v-icon>
-                  <v-icon v-if="task.homolog !== null " color="light-green" size="16"  @click="openLink(task.homolog)" >{{ 'mdi-server-network' }}</v-icon>
-                  <v-icon v-if="task.prod !== null " color="green" size="16"  @click="openLink(task.prod)">{{ 'mdi-server' }}</v-icon>
+                  <v-icon v-if="task.dev !== null " color="lime" size="16"  @click="openLink(task.dev)">{{ 'mdi-server-minus-outline' }}</v-icon>
+                  <v-icon v-if="task.homolog !== null " color="light-green" size="16"  @click="openLink(task.homolog)" >{{ 'mdi-server-minus' }}</v-icon>
+                  <v-icon v-if="task.prod !== null "  style="padding-bottom: 6px;" color="green" size="16"  @click="openLink(task.prod)">{{ 'mdi-server-network' }}</v-icon>
                 </span>
+
               </v-card-subtitle>
             </v-col>
 
@@ -58,7 +65,7 @@
               </v-icon>
 
               <v-icon v-if="task.status_id == 1" 
-                color="#AA0000" 
+                color="#E91E63" 
                 size="small" 
                 @click="deleteTask(task)">{{ 'mdi-trash-can-outline' }}
               </v-icon>
@@ -134,6 +141,7 @@
 
   // Função para carregar tarefas
 async function loadTasks() {
+    
     let id_task = props.selectedTask
     let archived = props.archiveds
 
@@ -145,8 +153,6 @@ async function loadTasks() {
       } else {
             let status_id = archived ? 1 : 0
             tasks.value = await db.tasks.where('archived').equals(status_id).toArray();
-            console.log(tasks.value)
-            console.log('^^^^^')
      }
     } catch (error) {
       console.error('Erro ao carregar as tarefas:', error);
@@ -177,6 +183,7 @@ async function loadTasks() {
       db.tasks.where('status_id').equals(2).modify({
         status_id: 1
       });
+
     } catch (error) {
       console.error('Erro ao atualizar o status das tarefas:', error);
     }
@@ -278,16 +285,20 @@ async function loadTasks() {
   }
 
 	function clearTimeTask(task) {
-    if(task.status_id == 1 && task.time == 0) return
-    db.tasks.update(task.id, { time: 0 }).then((updated) => { 
-      if (updated) {
-        snackbarText.value=`Contador da tarefa ${task.number} zerado.`
-        snackbar.value=true;
-        loadTasks(); 
-      } else {
-      }
-    }).catch((error) => {
-    });
+    if(task.status_id == 1 && task.time > 0) {
+        db.tasks.update(task.id, { time: 0 }).then((updated) => { 
+        if (updated) {
+          snackbarText.value=`Contador da tarefa ${task.number} zerado.`
+          snackbar.value=true;
+          loadTasks(); 
+        } else {
+        }
+      }).catch((error) => {
+      });
+    } else {
+     console.log('Só é possivel zerar tarefas pausadas e com time maior que 0')
+    }
+   
   }
 
   function deleteTask(task) {
