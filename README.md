@@ -12,7 +12,6 @@ Exibe lista de tarefas (`tasks`) baseada em dados persistidos no banco IndexedDB
 - **Vue 3** (com a API `setup`)
 - **Vuetify 3** para a interface de usuário
 - **IndexedDB** (via **Dexie.js**) para a persistência de dados
-- **ModalAddTasks**: Componente filho responsável por adicionar/editar tarefas
 
 ## Estrutura do Template
 
