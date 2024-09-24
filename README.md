@@ -1,79 +1,103 @@
-# Vuetify (Default)
-
-This is the official scaffolding tool for Vuetify, designed to give you a head start in building your new Vuetify application. It sets up a base template with all the necessary configurations and standard directory structure, enabling you to begin development without the hassle of setting up the project from scratch.
-
-## ❗️ Important Links
-
-- 📄 [Docs](https://vuetifyjs.com/)
-- 🚨 [Issues](https://issues.vuetifyjs.com/)
-- 🏬 [Store](https://store.vuetifyjs.com/)
-- 🎮 [Playground](https://play.vuetifyjs.com/)
-- 💬 [Discord](https://community.vuetifyjs.com)
-
-## 💿 Install
-
-Set up your project using your preferred package manager. Use the corresponding command to install the dependencies:
-
-| Package Manager                                                | Command        |
-|---------------------------------------------------------------|----------------|
-| [yarn](https://yarnpkg.com/getting-started)                   | `yarn install` |
-| [npm](https://docs.npmjs.com/cli/v7/commands/npm-install)     | `npm install`  |
-| [pnpm](https://pnpm.io/installation)                          | `pnpm install` |
-| [bun](https://bun.sh/#getting-started)                        | `bun install`  |
-
-After completing the installation, your environment is ready for Vuetify development.
-
-## ✨ Features
-
-- 🖼️ **Optimized Front-End Stack**: Leverage the latest Vue 3 and Vuetify 3 for a modern, reactive UI development experience. [Vue 3](https://v3.vuejs.org/) | [Vuetify 3](https://vuetifyjs.com/en/)
-- 🗃️ **State Management**: Integrated with [Pinia](https://pinia.vuejs.org/), the intuitive, modular state management solution for Vue.
-- 🚦 **Routing and Layouts**: Utilizes Vue Router for SPA navigation and vite-plugin-vue-layouts for organizing Vue file layouts. [Vue Router](https://router.vuejs.org/) | [vite-plugin-vue-layouts](https://github.com/JohnCampionJr/vite-plugin-vue-layouts)
-- ⚡ **Next-Gen Tooling**: Powered by Vite, experience fast cold starts and instant HMR (Hot Module Replacement). [Vite](https://vitejs.dev/)
-- 🧩 **Automated Component Importing**: Streamline your workflow with unplugin-vue-components, automatically importing components as you use them. [unplugin-vue-components](https://github.com/antfu/unplugin-vue-components)
-
-These features are curated to provide a seamless development experience from setup to deployment, ensuring that your Vuetify application is both powerful and maintainable.
-
-## 💡 Usage
-
-This section covers how to start the development server and build your project for production.
-
-### Starting the Development Server
-
-To start the development server with hot-reload, run the following command. The server will be accessible at [http://localhost:3000](http://localhost:3000):
-
 ```bash
-yarn dev
+npm install
+npm run dev
 ```
 
-(Repeat for npm, pnpm, and bun with respective commands.)
+# Tasks3
 
-> Add NODE_OPTIONS='--no-warnings' to suppress the JSON import warnings that happen as part of the Vuetify import mapping. If you are on Node [v21.3.0](https://nodejs.org/en/blog/release/v21.3.0) or higher, you can change this to NODE_OPTIONS='--disable-warning=5401'. If you don't mind the warning, you can remove this from your package.json dev script.
+Exibe lista de tarefas (`tasks`) baseada em dados persistidos no banco IndexedDB (via Dexie.js). O componente oferece funcionalidades para gerenciar tarefas, incluindo iniciar/pausar, arquivar, excluir, importar e exportar tasks e copiar informações para a área de transferência e alternar entre nodo claro e escuro. Integra um modal para adicionar ou editar tarefas e um snackbar para exibir mensagens ao usuário.
 
-### Building for Production
+## Dependências
 
-To build your project for production, use:
+- **Vue 3** (com a API `setup`)
+- **Vuetify 3** para a interface de usuário
+- **IndexedDB** (via **Dexie.js**) para a persistência de dados
+- **ModalAddTasks**: Componente filho responsável por adicionar/editar tarefas
 
-```bash
-yarn build
-```
+## Estrutura do Template
 
-(Repeat for npm, pnpm, and bun with respective commands.)
+### Layout Principal
 
-Once the build process is completed, your application will be ready for deployment in a production environment.
+O componente é encapsulado dentro de um `<v-container>`. Ele exibe tarefas em cartões (`<v-card>`), com base no estado da variável `tasks`.
 
-## 💪 Support Vuetify Development
+- Se não houver tarefas, um alerta (`<v-alert>`) é mostrado com a mensagem "Nenhum registro".
+- Cada tarefa é renderizada dentro de um `<v-col>` e `<v-card>` com informações como número, resumo, status, e links relacionados.
+- Ícones de ação permitem que o usuário interaja com cada tarefa:
+  - Iniciar/pausar tarefa (`mdi-play` / `mdi-pause`)
+  - Arquivar tarefa (`mdi-archive`)
+  - Excluir tarefa (`mdi-delete`)
+  - Limpar o tempo da tarefa (`mdi-refresh`, se já houver tempo registrado)
 
-This project is built with [Vuetify](https://vuetifyjs.com/en/), a UI Library with a comprehensive collection of Vue components. Vuetify is an MIT licensed Open Source project that has been made possible due to the generous contributions by our [sponsors and backers](https://vuetifyjs.com/introduction/sponsors-and-backers/). If you are interested in supporting this project, please consider:
+### Exibição da Tarefa
 
-- [Requesting Enterprise Support](https://support.vuetifyjs.com/)
-- [Sponsoring John on Github](https://github.com/users/johnleider/sponsorship)
-- [Sponsoring Kael on Github](https://github.com/users/kaelwd/sponsorship)
-- [Supporting the team on Open Collective](https://opencollective.com/vuetify)
-- [Becoming a sponsor on Patreon](https://www.patreon.com/vuetify)
-- [Becoming a subscriber on Tidelift](https://tidelift.com/subscription/npm/vuetify)
-- [Making a one-time donation with Paypal](https://paypal.me/vuetify)
+- **Título e Resumo**: O número da tarefa (`task.number`) e o resumo (`task.summary`) são exibidos no título do cartão. 
+  - Clicar no número ou no resumo copia o respectivo texto para a área de transferência.
+  
+- **Status da Tarefa**: O tempo decorrido é exibido e atualizado a cada segundo para tarefas em execução (`status_id === 2`). Para outras tarefas, o tempo total é mostrado.
 
-## 📑 License
-[MIT](http://opensource.org/licenses/MIT)
+- **Links**: Se disponíveis, links para ambientes de desenvolvimento, homologação e produção são mostrados como círculos coloridos (`mdi-circle`) e clicáveis.
 
-Copyright (c) 2016-present Vuetify, LLC
+### Modal para Adicionar/Editar Tarefas
+
+O componente modal `ModalAddTasks` é chamado para adicionar ou editar uma tarefa. Ele é referenciado no template via `ref="modalAddTask"`.
+
+- Quando uma tarefa é clicada duas vezes, o modal é aberto para edição da tarefa selecionada.
+  
+### Snackbar
+
+Um `snackbar` é exibido para mostrar mensagens de feedback ao usuário, como o sucesso de uma ação (por exemplo, ao copiar um texto ou arquivar uma tarefa).
+
+## Estrutura do Script
+
+### Propriedades
+
+- `statusView`: Propriedade recebida do componente pai, usada para filtrar as tarefas (exibir arquivadas ou não arquivadas).
+
+### Estado
+
+- `tasks`: Um array de tarefas carregado do banco de dados IndexedDB.
+- `time`: Um contador usado para exibir o tempo de uma tarefa em execução.
+- `snackbar`: Configurações do snackbar (mensagem, tempo de exibição, visibilidade).
+- `intervalHandle`: Controla o intervalo do timer para tarefas em execução.
+
+### Funções
+
+- **`loadTasks()`**: Carrega as tarefas do banco de dados com base no `statusView` (2 = não arquivadas, 3 = arquivadas).
+  
+- **`startTimer(task)`**: Inicia o temporizador para uma tarefa em execução e atualiza o tempo a cada 5 segundos no banco de dados.
+
+- **`stopTimer()`**: Para o temporizador se estiver em execução.
+
+- **`toggeStatus(task)`**: Alterna o status da tarefa entre iniciado (`status_id = 2`) e pausado (`status_id = 1`), e pausa todas as outras tarefas ativas.
+
+- **`pauseAll()`**: Pausa todas as tarefas que estão com o status de execução.
+
+- **`archiveTask(task)`**: Alterna o estado de arquivamento da tarefa entre arquivada e não arquivada.
+
+- **`deleteTask(task)`**: Remove a tarefa do banco de dados.
+
+- **`clearTimeTask(task)`**: Zera o tempo registrado para uma tarefa.
+
+- **`copyText(text)`**: Copia um texto para a área de transferência.
+
+- **`openLink(url)`**: Abre um link em uma nova aba do navegador.
+
+- **`formatTime(seconds)`**: Formata o tempo da tarefa (segundos) em um formato `DD:HH:MM:SS`.
+
+- **`findAndHandleRunningTask()`**: Ao carregar o componente, encontra qualquer tarefa em execução e a retoma.
+
+- **`showSnackbar(message, color, timeout)`**: Exibe uma mensagem no snackbar por um tempo determinado.
+
+### Watchers
+
+- **`watch(() => props.statusView, loadTasks)`**: Atualiza a lista de tarefas sempre que o `statusView` for alterado.
+
+### Lifecycle Hooks
+
+- **`onMounted()`**: Carrega as tarefas e verifica se há alguma tarefa em execução quando o componente é montado.
+
+## Estilos
+
+Estilos específicos podem ser aplicados via classes do Vuetify e propriedades inline nos componentes.
+
+
