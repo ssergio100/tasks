@@ -25,11 +25,11 @@
           <v-expansion-panel>
         <v-expansion-panel-title>Mais opções</v-expansion-panel-title>
         <v-expansion-panel-text expand-icon="mdi-menu-down">
-          <v-text-field hint="Link do chamado/tarefa" v-model="task.link" clearable label="Link"></v-text-field>
-          <v-text-field hint="Link do deploy homologação"  v-model="task.dev" clearable label="Dev"></v-text-field>
-          <v-text-field hint="Link do deploy homologação do cliente"  v-model="task.homolog" clearable label="Homolog"></v-text-field>
-          <v-text-field hint="Link do deploy produção"  v-model="task.prod" clearable label="Prod"></v-text-field>
-          <v-textarea hint="Comentários/anotações"v-model="task.comments" clearable label="Comments"></v-textarea>
+          <v-text-field hint="Link do chamado/tarefa" v-model="task.link" clearable label="Link da tarefa"></v-text-field>
+          <v-text-field hint="Link do deploy homologação"  v-model="task.dev" clearable label="Desenvolvimento"></v-text-field>
+          <v-text-field hint="Link do deploy homologação do cliente"  v-model="task.homolog" clearable label="Homologação"></v-text-field>
+          <v-text-field hint="Link do deploy produção"  v-model="task.prod" clearable label="Produção"></v-text-field>
+          <v-textarea hint="Comentários/anotações" v-model="task.comments" clearable label="Comentários"></v-textarea>
         </v-expansion-panel-text>
       </v-expansion-panel>
       </v-expansion-panels>

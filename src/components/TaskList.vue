@@ -1,7 +1,7 @@
 <template>
 
     <v-row>
-      <v-alert   type="info" v-if="tasks.length === 0" icon="mdi-clipboard-text-outline" text="Nenhum registro"></v-alert>
+      <v-alert   type="info" v-if="tasks.length === 0" icon="mdi-clipboard-text-outline" :text=" archiveds == false? 'Nenhuma task cadastrada' : 'Nenhuma task arquivada'"></v-alert>
      
       <v-col v-for="task in tasks" :key="task.id" cols="12" :md="colNum"  style="padding:3px !important;">
         <v-card 
@@ -45,7 +45,7 @@
               </v-card-subtitle>
             </v-col>
 
-            <v-col class="d-flex justify-end" cols="auto">
+            <v-col class="d-flex justify-end" cols="auto" style="padding-left: 13px;">
               <v-icon v-if="task.status_id === 1 && task.archived !== 1" 
                 :color="colorIcons" 
                 size="small" 
@@ -53,10 +53,10 @@
               </v-icon>
 
               <v-icon v-if="task.status_id === 2"
-              :color="task.color" 
-              size="small" 
-              class="mb-1 v-avatar--metronome"  
-              @click="toggeStatus(task)">{{ 'mdi-pause-box-outline' }}
+                :color="task.color" 
+                size="small" 
+                class="mb-1 v-avatar--metronome"  
+                @click="toggeStatus(task)">{{ 'mdi-pause-box-outline' }}
               </v-icon>
 
               <v-icon v-if="task.status_id == 1" 
@@ -99,6 +99,7 @@
         </v-btn>
       </template>
     </v-snackbar>
+    
 
 </template>
 
@@ -145,14 +146,15 @@ async function loadTasks() {
     let id_task = props.selectedTask
     let archived = props.archiveds
 
-    console.log(id_task);
     try {
       if (id_task !== null) {
-        console.log(id_task);
         tasks.value = await db.tasks.where('number').equals(id_task).toArray();
       } else {
             let status_id = archived ? 1 : 0
-            tasks.value = await db.tasks.where('archived').equals(status_id).toArray();
+            tasks.value = await db.tasks.where('archived')
+            .equals(status_id)
+            .reverse()
+            .sortBy('status_id');
      }
     } catch (error) {
       console.error('Erro ao carregar as tarefas:', error);
@@ -219,13 +221,13 @@ async function loadTasks() {
         if (updated){
           showSnackbar(`Tarefa ${task.number} ${statusText}.`, 'lime')
         }else{
-          console.log("Não atualizado");
+          showSnackbar(`Erro ao arquivar a tarefa ${task.number}`, 'error','mdi-alert-circle', 2000)
         }
       });
 
       loadTasks()
     } catch (error) {
-      console.error('Erro ao arquivar a tarefa:', error);
+      showSnackbar(`Erro ao arquivar a tarefa ${task.number}`, 'error','mdi-alert-circle', 2000)
     }
   }
   
@@ -238,11 +240,8 @@ async function loadTasks() {
       const now = Date.now();
       const elapsed = (now - startTime) / 1000; 
       time.value = task.time + elapsed;
-
-      console.log(1111)
-
+       console.log('timer')
       if (Math.floor(elapsed) % 5 === 0) {
-          console.log(2222)
           updateTimeTask(task.id, Math.floor(time.value));
           emit('child-event',1)
       }
@@ -288,15 +287,14 @@ async function loadTasks() {
     if(task.status_id == 1 && task.time > 0) {
         db.tasks.update(task.id, { time: 0 }).then((updated) => { 
         if (updated) {
-          snackbarText.value=`Contador da tarefa ${task.number} zerado.`
-          snackbar.value=true;
+          showSnackbar(`Contador da tarefa ${task.number} zerado.`, 'lime')
           loadTasks(); 
         } else {
         }
       }).catch((error) => {
       });
     } else {
-     console.log('Só é possivel zerar tarefas pausadas e com time maior que 0')
+      showSnackbar('Só é possivel zerar tarefas pausadas e com time maior que 0', '#FF5722', null, 5000)
     }
    
   }
@@ -340,7 +338,8 @@ async function loadTasks() {
     }
   }
 
-  function showSnackbar(text = 'Mensagem padrão', color = 'lime', icon='mdi-information-variant-box-outline', timeout = 1000) {
+  function showSnackbar(text = 'Mensagem padrão', color = 'lime', icon = null, timeout = 1000) {
+    icon = icon === null ? 'mdi-information-variant-box-outline' : icon
     snackbarIcon.value = icon;
     snackbarText.value = text;
     snackbarColor.value = color;
@@ -360,7 +359,6 @@ async function loadTasks() {
       showSnackbar(`Copiado para área de transferencia.`, 'lime')
     } catch (err) {
       console.error('Erro ao copiar o texto: ', err);
-      //this.showSnackbar(err, 'error')
     }
     document.body.removeChild(textArea);
   }
@@ -380,7 +378,6 @@ async function loadTasks() {
   });
 
   watch(() => props.archiveds, (newVal) => {
-      console.log(newVal)
       loadTasks(newVal);
   });
 
