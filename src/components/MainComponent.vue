@@ -73,14 +73,6 @@
           </v-btn>
         </template>
       </v-tooltip>
-      
-      <v-tooltip text="Adicionar tarefa" location="top">
-        <template v-slot:activator="{ props }">
-          <v-btn value="add" v-bind="props" @click="openModal" style="margin: 3px">
-            <v-icon>mdi-plus</v-icon>
-          </v-btn>
-        </template>
-      </v-tooltip>
 
       <v-tooltip text="Esportar/Importar tarefas" location="top">
         <template v-slot:activator="{ props }">
@@ -104,6 +96,14 @@
           <v-btn value="status" v-bind="props" @click=" colNum = colNum === 6 ? 12 : 6;" style="margin: 3px">
             <v-icon v-if="colNum === 6">mdi-format-align-justify</v-icon>
             <v-icon v-if="colNum === 12">mdi-format-columns</v-icon>
+          </v-btn>
+        </template>
+      </v-tooltip>
+
+      <v-tooltip text="Adicionar tarefa" location="top">
+        <template v-slot:activator="{ props }">
+          <v-btn value="add" v-bind="props" @click="openModal" style="margin: 3px">
+            <v-icon>mdi-plus</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
