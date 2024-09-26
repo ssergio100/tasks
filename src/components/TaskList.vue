@@ -13,33 +13,33 @@
             <v-col>
               <v-card-title style="font-size: 14px;" >
                 <span :style="{ color: task.color }"  @click="copyText(task.number)" >{{ task.number }}</span>
-                <span style="font-size: 10px;"class="text-truncate"  @click="copyText(task.summary)"> - {{ truncate(task.summary, colNum === 6 ? 60 : 200) }}</span>
+                <span style="font-size: 12px;" class="text-truncate"  @click="copyText(task.summary)"> - {{ truncate(task.summary, colNum === 6 ? 60 : 200) }}</span>
               </v-card-title>
 
-              <v-card-subtitle style="padding-bottom: 7px;opacity: 1;" >
-				        <span 
-                  @click="clearTimeTask(task)" 
-                  style="opacity: 0.5;padding-right: 10px;">
+              <v-card-subtitle  class="card-subtitle" >
+				        <span class="time"
+                  @click="clearTimeTask(task)">
                   {{ task.status_id === 2 ? formattedTime : formatTime(task.time) }}
                 </span>
-                <v-tooltip :text=task.comments>
+               
+           
+               
+                
+                <span> 
+                  <v-tooltip :text=task.comments>
                   <template v-slot:activator="{ props }">
                     <v-icon v-bind="props" @click="copyText(task.comments)"
                         v-if="task.comments !== null" 
                         color="blue-grey-lighten-3" 
-                        size="16" 
-                        style="padding-bottom: 7px; padding-right: 10px" >
-                        {{ 'mdi-account-voice' }}
+                        size="16">
+                        {{ 'mdi-comment-processing-outline' }}
                     </v-icon>
                   </template>
-                </v-tooltip>
-           
-                <v-icon v-if="task.link !== null " color="blue-grey-lighten-3" size="16" @click="openLink(task.link)">{{ 'mdi-link' }}</v-icon>
-                
-                <span style="padding-left: 5px;">  
-                  <v-icon v-if="task.dev !== null " color="lime" size="16"  @click="openLink(task.dev)">{{ 'mdi-server-minus-outline' }}</v-icon>
-                  <v-icon v-if="task.homolog !== null " color="light-green" size="16"  @click="openLink(task.homolog)" >{{ 'mdi-server-minus' }}</v-icon>
-                  <v-icon v-if="task.prod !== null "  style="padding-bottom: 6px;" color="green" size="16"  @click="openLink(task.prod)">{{ 'mdi-server-network' }}</v-icon>
+                </v-tooltip> 
+                  <v-icon v-if="task.link !== null " color="blue-grey-lighten-3" size="16" @click="openLink(task.link)">{{ 'mdi-link-box-variant-outline' }}</v-icon>
+                  <v-icon v-if="task.dev !== null " color="lime" size="16"  @click="openLink(task.dev)">{{ 'mdi-server-outline' }}</v-icon>
+                  <v-icon v-if="task.homolog !== null " color="light-green" size="16"  @click="openLink(task.homolog)" >{{ 'mdi-server' }}</v-icon>
+                  <v-icon v-if="task.prod !== null " color="green" size="16"  @click="openLink(task.prod)">{{ 'mdi-server-security' }}</v-icon>
                 </span>
 
               </v-card-subtitle>
@@ -399,6 +399,15 @@ async function loadTasks() {
     animation-iteration-count: infinite;
     animation-timing-function: ease-in-out;
     animation-direction: alternate;
+  }
+
+  .card-subtitle{
+    padding-bottom: 7px;
+    opacity: 1
+  }
+  .time{
+    opacity: 0.5;
+    padding-right: 10px;
   }
 
   @keyframes metronome-example {
