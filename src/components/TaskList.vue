@@ -2,30 +2,33 @@
 
     <v-row>
       <v-alert   type="info" v-if="tasks.length === 0" icon="mdi-clipboard-text-outline" :text=" archiveds == false? 'Nenhuma task cadastrada' : 'Nenhuma task arquivada'"></v-alert>
-     
+
       <v-col v-for="task in tasks" :key="task.id" cols="12" :md="colNum"  style="padding:3px !important;">
         <v-card 
+        v-touch="{
+          left: () => swipe('Left', task),
+          right: () => swipe('Right', task),
+        }"
         class="mx-auto" 
         hover :color="task.archived === 1 ? '#FFEB3B' : 'defaultColor'" 
         @dblclick="handleDoubleClick(task)"
         >
-          <v-row align="center" no-gutters style="padding-right: 20px;">
+          <v-row align="center" no-gutters 
+          style="padding-right: 20px;
+          ">
             <v-col>
               <v-card-title style="font-size: 14px;" >
                 <span :style="{ color: task.color }"  @click="copyText(task.number)" >{{ task.number }}</span>
                 <span style="font-size: 12px;" class="text-truncate"  @click="copyText(task.summary)"> - {{ truncate(task.summary, colNum === 6 ? 60 : 200) }}</span>
               </v-card-title>
 
-              <v-card-subtitle  class="card-subtitle" >
-				        <span class="time"
+              <v-card-subtitle  class="card-subtitle"  v-if="!isMobile">
+				        <span class="time"  
                   @click="clearTimeTask(task)">
                   {{ task.status_id === 2 ? formattedTime : formatTime(task.time) }}
                 </span>
-               
-           
-               
-                
-                <span> 
+              
+                <span v-if="!isMobile" > 
                   <v-tooltip :text=task.comments>
                   <template v-slot:activator="{ props }">
                     <v-icon v-bind="props" @click="copyText(task.comments)"
@@ -43,10 +46,26 @@
                 </span>
 
               </v-card-subtitle>
+              
             </v-col>
 
-            <v-col class="d-flex justify-end" cols="auto" style="padding-left: 13px;">
-              <v-icon v-if="task.status_id === 1 && task.archived !== 1" 
+           <v-col class="d-flex justify-end" cols="auto" style="padding-left: 13px;">
+           
+           <!-- bloco caso a interface seja celular -->
+           <v-col v-if="isMobile">
+            <v-switch
+              :model-value="task.status_id === 2"              
+              :color="task.color"
+              hide-details
+              
+              :label = " task.status_id === 2 ? formattedTime : formatTime(task.time)"
+              @update:model-value="(isOn) => switchStatus(task, isOn)"
+            ></v-switch>
+          </v-col>
+  
+             <!-- bloco caso a interface seja desktop -->
+             <v-responsive v-else>
+             <v-icon v-if="task.status_id === 1 && task.archived !== 1" 
                 :color="colorIcons" 
                 size="small" 
                 @click="toggeStatus(task)">{{ 'mdi-play-box-outline' }}
@@ -68,9 +87,15 @@
                 color="#E91E63" 
                 size="small" 
                 @click="deleteTask(task)">{{ 'mdi-trash-can-outline' }}
-              </v-icon>
-            </v-col>
+              </v-icon> 
+
+            </v-responsive> 
+            </v-col>  
+             
+            <!--  -->
+
           </v-row>
+          {{ swipeDirection.none }}
         </v-card>
       </v-col>
 
@@ -106,6 +131,7 @@
 <script setup>
   import {ref, watch, onMounted, computed} from 'vue';
   import ModalAddTasks from './ModalAddTask.vue';
+  import { useIsMobile } from '@/composables/useIsMobile';
   import db from '../db';
 
   // Definindo a prop recebida do componente pai
@@ -117,12 +143,12 @@
       required: true
     }
   });
+  const isMobile = useIsMobile();
 
   // Estado
   const tasks = ref([]);
   const time = ref(0);
   const modalAddTask = ref(null);
-  const colorIcons = 'blue';
   const intervalHandle = ref(null); // Declarar intervalHandle como um ref
   const snackbar = ref(false);
   const snackbarText = ref("Hello, I'm a snackbar");
@@ -130,9 +156,10 @@
   const snackbarTimeout = ref(1000);
   const snackbarIcon = ref();
   const taskId = ref('');
-  
+  const swipeDirection= ref('None');
+  const colorIcons  = ref('indigo')
+
   const emit = defineEmits(['child-event']);
-  
   const formattedTime = computed(() => {
     return formatTime(time.value); // Substitua "formatTime" pela sua função de formatação
   });
@@ -140,6 +167,16 @@
 
   const isModalConfirm = ref(false);
 
+ function swipe(direction, task) {
+ 
+        swipeDirection.value = direction
+        console.log(direction)
+        if(direction === 'Left') {
+          archiveTask(task)
+        } else {
+          deleteTask(task)
+        }
+      }
   // Função para carregar tarefas
 async function loadTasks() {
     
@@ -170,6 +207,16 @@ async function loadTasks() {
     loadTasks()
   }
 
+  async function switchStatus(task, isOn){
+    console.log(isOn)
+    pauseAll()
+      if (isOn) {
+        await doStartTask(task); // Se a chave está ON, inicia a tarefa
+      }
+    
+      loadTasks()
+  }
+
   function truncate(text, maxLength) {
     if (text.length > maxLength) {
       return text.substring(0, maxLength) + '...';
@@ -195,7 +242,7 @@ async function loadTasks() {
     doStartTask(task)
   }
 
-  function doStartTask(task) {
+  async function doStartTask(task) {
     try {
       db.tasks.where('id').equals(task.id).modify({
         status_id: 2
@@ -219,9 +266,9 @@ async function loadTasks() {
         status_id: 1
       }).then(function (updated) {
         if (updated){
-          showSnackbar(`Tarefa ${task.number} ${statusText}.`, 'lime')
+          showSnackbar(`Tarefa ${task.number} ${statusText}.`, 'lime',2000)
         }else{
-          showSnackbar(`Erro ao arquivar a tarefa ${task.number}`, 'error','mdi-alert-circle', 2000)
+          showSnackbar(`Erro ao arquivar a tarefa ${task.number}`, 'error','mdi-alert-circle', 3000)
         }
       });
 
@@ -387,7 +434,7 @@ async function loadTasks() {
   });
   
   defineExpose({
-	loadTasks, copyText
+	loadTasks, copyText, formatTime
 });
 
 </script>

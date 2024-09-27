@@ -1,8 +1,12 @@
 <template>
-  
-  <div class="icon-container" v-if="isVisible">
+  <v-system-bar>
+
+    <div class="" v-if="isVisible">
       <v-icon color="#AAAA00" size="8">{{ 'mdi-circle' }}</v-icon>
     </div>
+  <span class="ms-2">Tarefas:{{total_tasks}} Total:{{total_time}}</span>
+</v-system-bar>
+
   <v-container>
     <v-row>
 
@@ -51,7 +55,7 @@
 
 
   <div class="footer-actions text-center">
-    <v-menu>
+    <v-bottom-navigation>
       <template v-slot:activator="{ props: activatorProps }" >
         <v-icon v-bind="activatorProps">mdi-menu</v-icon>
       </template>
@@ -66,7 +70,7 @@
         </template>
       </v-tooltip>
 
-      <v-tooltip text="Procurar task" location="top">
+      <v-tooltip text="Procurar task" location="top" v-if="!isMobile">
         <template v-slot:activator="{ props }">
           <v-btn value="status" @click="showSearcTask = !showSearcTask" v-bind="props" style="margin: 3px">
             <v-icon>mdi-selection-search</v-icon>
@@ -91,7 +95,7 @@
         </template>
       </v-tooltip>
 
-      <v-tooltip :text="colNum === 6 ? 'Uma coluna' : 'Duas colunas'" location="top">
+      <v-tooltip :text="colNum === 6 ? 'Uma coluna' : 'Duas colunas'" location="top" v-if="!isMobile">
         <template v-slot:activator="{ props }">
           <v-btn value="status" v-bind="props" @click=" colNum = colNum === 6 ? 12 : 6;" style="margin: 3px">
             <v-icon v-if="colNum === 6">mdi-format-align-justify</v-icon>
@@ -103,13 +107,13 @@
       <v-tooltip text="Adicionar tarefa" location="top">
         <template v-slot:activator="{ props }">
           <v-btn value="add" v-bind="props" @click="openModal" style="margin: 3px">
-            <v-icon>mdi-plus</v-icon>
+            <v-icon>mdi-plus-thick</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
 
  
-    </v-menu>
+    </v-bottom-navigation>
   </div>
 
   
@@ -121,16 +125,20 @@
 <script setup>
   import {
     ref,
-    onMounted
+    onMounted,
+    computed
   } from 'vue';
   import {
     useTheme
   } from 'vuetify';
   import ModalAddTasks from './ModalAddTask.vue';
   import TaskList from './TaskList.vue';
+  import { useIsMobile } from '@/composables/useIsMobile';
+
   import db from '../db';
 
   const theme = useTheme();
+  const isMobile = useIsMobile();
   const isDarkMode = ref(theme.global.current.value.dark);
   const colNum = ref(12);
   const showSearcTask = ref(false);
@@ -143,7 +151,8 @@
   const tasks = ref([]);
   const taskNumbers = ref([]);
   const selectedTask = ref(null);
-
+  const total_time = ref(0);
+  const total_tasks = ref(0);
   onMounted(() => {
     _loadTasks();
   });
@@ -153,6 +162,7 @@
 
 function handleChildEvent(payload) {
   console.log('Evento recebido do filho:', payload);
+  sumTaskTime()
   showIconTemporarily();
 }
 
@@ -219,10 +229,6 @@ function showIconTemporarily() {
     }
   }
 
-  function toggleColNum() {
-    colNum.value = colNum.value === 6 ? 12 : 6; // Alterna entre 6 e 12
-  }
-
   function toggleView() {
     archiveds.value = !archiveds.value
     //console.log(archiveds.value)
@@ -237,6 +243,15 @@ function showIconTemporarily() {
     taskList.value.loadTasks();
   }
 
+  async function sumTaskTime() {
+
+    const tasks = await db.tasks.toArray(); 
+    console.log(tasks.length)
+    const totalTasks = tasks.length
+    total_tasks.value = totalTasks
+    const totalTime = tasks.reduce((acc, task) => acc + (task.time || 0), 0); // Soma todos os valores de task.time
+    total_time.value = taskList.value.formatTime(totalTime); // Retorna o total
+};
 
 </script>
 
