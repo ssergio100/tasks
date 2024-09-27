@@ -5,6 +5,7 @@
 
       <v-col v-for="task in tasks" :key="task.id" cols="12" :md="colNum"  style="padding:3px !important;">
         <v-card 
+        @pointerdown="playVideo()"
         v-touch="{
           left: () => swipe('Left', task),
           right: () => swipe('Right', task),
@@ -115,11 +116,11 @@
       </v-card>
     </v-dialog>
 
-    <v-snackbar v-model="snackbar" :timeout="snackbarTimeout" :color="snackbarColor">
-      <v-icon class="me-2">  {{ snackbarIcon }}</v-icon>
-      {{ snackbarText }}
+    <v-snackbar v-model="snackbar.visible" :timeout="snackbar.timeout" :color="snackbar.color">
+      <v-icon class="me-2">  {{ snackbar.icon }}</v-icon>
+      {{ snackbar.text }}
       <template v-slot:actions>
-        <v-btn variant="text" @click="snackbar = false">
+        <v-btn variant="text" @click="snackbar.visible = false">
           Fechar
         </v-btn>
       </template>
@@ -150,11 +151,17 @@
   const time = ref(0);
   const modalAddTask = ref(null);
   const intervalHandle = ref(null); // Declarar intervalHandle como um ref
-  const snackbar = ref(false);
-  const snackbarText = ref("Hello, I'm a snackbar");
-  const snackbarColor = ref("");
-  const snackbarTimeout = ref(1000);
-  const snackbarIcon = ref();
+  const snackbar = ref(
+    {visible:false},
+    {text:"Hello, I'm a snackbar"},
+    {color:''},
+    {timeout:1000},
+    {icon:''}
+    );
+  // const snackbarText = ref("Hello, I'm a snackbar");
+  // const snackbarColor = ref("");
+  // const snackbarTimeout = ref(1000);
+  // const snackbarIcon = ref();
   const taskId = ref('');
   const swipeDirection= ref('None');
   const colorIcons  = ref('indigo')
@@ -166,7 +173,10 @@
 
 
   const isModalConfirm = ref(false);
-
+ 
+  function playVideo(){
+    console.log('pressionadp')
+  }
  function swipe(direction, task) {
  
         swipeDirection.value = direction
@@ -387,11 +397,12 @@ async function loadTasks() {
 
   function showSnackbar(text = 'Mensagem padrão', color = 'lime', icon = null, timeout = 1000) {
     icon = icon === null ? 'mdi-information-variant-box-outline' : icon
-    snackbarIcon.value = icon;
-    snackbarText.value = text;
-    snackbarColor.value = color;
-    snackbarTimeout.value = timeout;
-    snackbar.value=true;
+    // snackbarIcon.value = icon;
+    snackbar.value.icon = icon;
+    snackbar.value.text = text;
+    snackbar.value.color = color;
+    snackbar.value.timeout = timeout;
+    snackbar.value.visible = true;
   }
 
   function copyText(text) {
